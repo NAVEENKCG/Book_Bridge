@@ -1,0 +1,664 @@
+<!doctype html>
+<html lang="en" class="h-full scroll-smooth">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{% block title %}BookBridge{% endblock %}</title>
+  <meta name="description"
+    content="{% block description %}Campus book exchange — buy, sell and swap textbooks with verified students at your college.{% endblock %}" />
+
+  <!-- Link Previews / Open Graph -->
+  <meta property="og:title" content="{% block og_title %}BookBridge{% endblock %}" />
+  <meta property="og:description"
+    content="{% block og_description %}Campus book exchange — buy, sell and swap textbooks with verified students at your college.{% endblock %}" />
+  <meta property="og:type" content="website" />
+  <meta property="og:image"
+    content="{% block og_image %}https://placehold.co/1200x630/6c47ff/ffffff?text=BookBridge+Campus+Exchange{% endblock %}" />
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="{% block tw_title %}BookBridge{% endblock %}" />
+  <meta name="twitter:description"
+    content="{% block tw_description %}Campus book exchange — buy, sell and swap textbooks with verified students at your college.{% endblock %}" />
+  <meta name="twitter:image"
+    content="{% block tw_image %}https://placehold.co/1200x630/6c47ff/ffffff?text=BookBridge+Campus+Exchange{% endblock %}" />
+
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap"
+    rel="stylesheet" />
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'ui-sans-serif', 'system-ui'],
+            display: ['Syne', 'ui-sans-serif'],
+          },
+          colors: {
+            brand: {
+              DEFAULT: '#6c47ff',
+              50: '#f3f0ff',
+              100: '#e9e3ff',
+              200: '#d4caff',
+              300: '#b4a4ff',
+              400: '#9070ff',
+              500: '#6c47ff',
+              600: '#5a2ef5',
+              700: '#4d22e2',
+              800: '#401cbf',
+              900: '#371a9c',
+            },
+            surface: {
+              DEFAULT: '#0f0f14',
+              card: '#16161e',
+              elevated: '#1c1c27',
+              border: '#2a2a38',
+              'border-light': '#32324a',
+            },
+          },
+          boxShadow: {
+            'glow': '0 0 24px rgba(108,71,255,0.25)',
+            'glow-sm': '0 0 12px rgba(108,71,255,0.15)',
+            'card': '0 4px 24px rgba(0,0,0,0.4)',
+            'card-hover': '0 8px 40px rgba(0,0,0,0.5)',
+          },
+          animation: {
+            'fade-in': 'fadeIn 0.25s ease-out',
+            'slide-up': 'slideUp 0.3s ease-out',
+            'pulse-slow': 'pulse 3s ease-in-out infinite',
+          },
+          keyframes: {
+            fadeIn: { from: { opacity: 0 }, to: { opacity: 1 } },
+            slideUp: { from: { opacity: 0, transform: 'translateY(10px)' }, to: { opacity: 1, transform: 'translateY(0)' } },
+          },
+        },
+      },
+    }
+  </script>
+
+  <style>
+    /* ── Global tokens ────────────────────────────────────────────────── */
+    body {
+      background-color: #0f0f14;
+      color: #e8e8f0;
+      font-family: 'Inter', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* ── Noise texture overlay ─────────────────────────────────────────── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+      background-size: 150px;
+      opacity: 0.4;
+    }
+
+    /* ── Scrollbar ─────────────────────────────────────────────────────── */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #16161e;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #3a3a52;
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: #6c47ff;
+    }
+
+    /* ── Shared input style ──────────────────────────────────────────── */
+    .bb-input {
+      width: 100%;
+      padding: 0.625rem 0.875rem;
+      background: #1c1c27;
+      border: 1px solid #2a2a38;
+      border-radius: 0.625rem;
+      color: #e8e8f0;
+      font-size: 0.875rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .bb-input::placeholder {
+      color: #4a4a65;
+    }
+
+    .bb-input:focus {
+      border-color: #6c47ff;
+      box-shadow: 0 0 0 3px rgba(108, 71, 255, 0.15);
+    }
+
+    /* ── Shared card ─────────────────────────────────────────────────── */
+    .bb-card {
+      background: #16161e;
+      border: 1px solid #2a2a38;
+      border-radius: 1rem;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+    }
+
+    /* ── Shared primary button ────────────────────────────────────────── */
+    .bb-btn-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.375rem;
+      padding: 0.625rem 1.25rem;
+      background: linear-gradient(135deg, #6c47ff 0%, #5238e8 100%);
+      color: #fff;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border-radius: 0.625rem;
+      border: none;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.2s, opacity 0.2s;
+      box-shadow: 0 4px 14px rgba(108, 71, 255, 0.35);
+    }
+
+    .bb-btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 20px rgba(108, 71, 255, 0.45);
+    }
+
+    .bb-btn-primary:active {
+      transform: translateY(0);
+    }
+
+    /* ── Shared ghost button ──────────────────────────────────────────── */
+    .bb-btn-ghost {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.375rem;
+      padding: 0.625rem 1rem;
+      background: transparent;
+      color: #a0a0c0;
+      font-size: 0.875rem;
+      font-weight: 500;
+      border-radius: 0.625rem;
+      border: 1px solid #2a2a38;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s, border-color 0.15s;
+    }
+
+    .bb-btn-ghost:hover {
+      background: #1c1c27;
+      color: #e8e8f0;
+      border-color: #3a3a52;
+    }
+
+    /* ── Badge ────────────────────────────────────────────────────────── */
+    .bb-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.2rem 0.6rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+
+    /* ── Condition badges ──────────────────────────────────────────────── */
+    .cond-new {
+      background: rgba(34, 197, 94, 0.15);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .cond-likenew {
+      background: rgba(16, 185, 129, 0.15);
+      color: #34d399;
+      border: 1px solid rgba(16, 185, 129, 0.2);
+    }
+
+    .cond-good {
+      background: rgba(99, 102, 241, 0.15);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .cond-fair {
+      background: rgba(245, 158, 11, 0.15);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .cond-poor {
+      background: rgba(239, 68, 68, 0.15);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    /* ── Status badges ──────────────────────────────────────────────────── */
+    .status-available {
+      background: rgba(34, 197, 94, 0.12);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .status-pending {
+      background: rgba(245, 158, 11, 0.12);
+      color: #fbbf24;
+      border: 1px solid rgba(245, 158, 11, 0.2);
+    }
+
+    .status-completed {
+      background: rgba(99, 102, 241, 0.12);
+      color: #a5b4fc;
+      border: 1px solid rgba(99, 102, 241, 0.2);
+    }
+
+    .status-unavailable {
+      background: rgba(100, 100, 120, 0.12);
+      color: #6b7080;
+      border: 1px solid rgba(100, 100, 120, 0.2);
+    }
+
+    .status-accepted {
+      background: rgba(34, 197, 94, 0.12);
+      color: #4ade80;
+      border: 1px solid rgba(34, 197, 94, 0.2);
+    }
+
+    .status-rejected {
+      background: rgba(239, 68, 68, 0.12);
+      color: #f87171;
+      border: 1px solid rgba(239, 68, 68, 0.2);
+    }
+
+    /* ── Nav link ─────────────────────────────────────────────────────── */
+    .nav-link {
+      padding: 0.375rem 0.75rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #8888a8;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .nav-link:hover {
+      background: #1c1c27;
+      color: #e8e8f0;
+    }
+
+    .nav-link.active {
+      color: #c4b5fd;
+    }
+
+    /* ── Glassy panel (BookBot) ───────────────────────────────────────── */
+    .glass {
+      background: rgba(22, 22, 30, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(108, 71, 255, 0.18);
+    }
+
+    /* ── Gradient text ────────────────────────────────────────────────── */
+    .gradient-text {
+      background: linear-gradient(135deg, #c4b5fd 0%, #6c47ff 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* ── Animated gradient border for hero ────────────────────────────── */
+    .hero-glow {
+      position: relative;
+    }
+
+    .hero-glow::after {
+      content: '';
+      position: absolute;
+      inset: -1px;
+      border-radius: inherit;
+      background: linear-gradient(135deg, rgba(108, 71, 255, 0.4), rgba(29, 233, 182, 0.2), rgba(108, 71, 255, 0.4));
+      z-index: -1;
+      filter: blur(16px);
+      opacity: 0.6;
+    }
+
+    /* ── Book card hover ─────────────────────────────────────────────── */
+    .book-card {
+      background: #16161e;
+      border: 1px solid #2a2a38;
+      border-radius: 1rem;
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    .book-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(108, 71, 255, 0.2);
+      border-color: rgba(108, 71, 255, 0.3);
+    }
+
+    /* ── Page wrapper ─────────────────────────────────────────────────── */
+    .page-wrap {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── Divider ──────────────────────────────────────────────────────── */
+    .bb-divider {
+      border-color: #2a2a38;
+    }
+
+    /* ── Select dark ─────────────────────────────────────────────────── */
+    select.bb-input {
+      color: #e8e8f0;
+    }
+
+    select.bb-input option {
+      background: #1c1c27;
+      color: #e8e8f0;
+    }
+  </style>
+</head>
+
+<body class="min-h-full">
+  <div class="page-wrap">
+
+    <!-- ── Navbar ────────────────────────────────────────────────────────── -->
+    <header class="sticky top-0 z-40"
+      style="background:rgba(15,15,20,0.8);backdrop-filter:blur(16px);border-bottom:1px solid rgba(42,42,56,0.8);">
+      <nav class="max-w-7xl mx-auto px-4 sm:px-6 h-15 flex items-center justify-between gap-4" style="height:3.75rem;">
+
+        <!-- Logo -->
+        <a href="/" id="nav-logo" class="flex items-center gap-2.5 shrink-0 group">
+          <div class="w-8 h-8 rounded-lg flex items-center justify-center font-display font-bold text-sm text-white"
+            style="background:linear-gradient(135deg,#6c47ff,#9070ff);">B</div>
+          <span class="font-display font-bold text-white tracking-tight text-base">BookBridge</span>
+        </a>
+
+        <!-- Centre links -->
+        <div class="hidden sm:flex items-center gap-1">
+          <a href="/" id="nav-browse" class="nav-link {% if request.url.path == '/' %}active{% endif %}">Browse</a>
+          <a href="/wanted" id="nav-wanted"
+            class="nav-link {% if request.url.path == '/wanted' %}active{% endif %}">Wanted Board</a>
+          {% if request.state.user %}
+          <a href="/my-listings" id="nav-listings"
+            class="nav-link {% if request.url.path == '/my-listings' %}active{% endif %}">My Listings</a>
+          <a href="/my-requests" id="nav-requests"
+            class="nav-link {% if request.url.path == '/my-requests' %}active{% endif %}">Requests</a>
+          {% endif %}
+        </div>
+
+        <!-- Right section -->
+        <div class="flex items-center gap-2 shrink-0">
+          {% if request.state.user %}
+          <!-- BookCoin badge -->
+          <span class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold"
+            style="background:rgba(245,158,11,0.12);color:#fbbf24;border:1px solid rgba(245,158,11,0.2);">
+            <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <circle cx="10" cy="10" r="9" fill="none" stroke="currentColor" stroke-width="1.5" />
+              <path d="M10 5v10M7.5 7.5h3.75a1.25 1.25 0 010 2.5H7.5m0 0h3.75a1.25 1.25 0 010 2.5H7.5"
+                stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>
+            {{ request.state.user.bookcoin_bal }}
+          </span>
+
+          <!-- Wishlist heart icon -->
+          <a href="/wishlist" id="nav-wishlist" title="My Wishlist"
+            class="hidden sm:flex w-8 h-8 items-center justify-center rounded-lg transition-colors hover:bg-surface-elevated"
+            style="color:#8888a8;">
+            <svg class="w-4.5 h-4.5" style="width:1.1rem;height:1.1rem;" fill="none" stroke="currentColor"
+              stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z" />
+            </svg>
+          </a>
+
+          <!-- Notification bell -->
+          <a href="/notifications" id="nav-notifications" title="Notifications"
+            class="hidden sm:flex relative w-8 h-8 items-center justify-center rounded-lg transition-colors hover:bg-surface-elevated"
+            style="color:#8888a8;">
+            <svg class="w-4.5 h-4.5" style="width:1.1rem;height:1.1rem;" fill="none" stroke="currentColor"
+              stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+            </svg>
+            <span id="notif-badge"
+              class="hidden absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full text-xs font-bold flex items-center justify-center"
+              style="background:#6c47ff;color:#fff;font-size:0.6rem;"></span>
+          </a>
+
+          <!-- Avatar + name -->
+          <a href="/profile/{{ request.state.user.id }}" id="nav-profile"
+            class="hidden sm:inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg transition-colors hover:bg-surface-elevated">
+            <span class="w-6 h-6 rounded-full flex items-center justify-center text-xs font-bold text-white"
+              style="background:linear-gradient(135deg,#6c47ff,#9070ff);">{{ request.state.user.name[0].upper()
+              }}</span>
+            <span class="text-sm font-medium text-gray-300">{{ request.state.user.name.split()[0] }}</span>
+          </a>
+
+          <a href="/list" id="nav-list-book" class="bb-btn-primary">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            List Book
+          </a>
+          <a href="/logout" id="nav-logout" class="bb-btn-ghost text-xs px-3 py-1.5 hidden sm:inline-flex">Logout</a>
+          {% else %}
+          <a href="/login" id="nav-login" class="bb-btn-ghost">Login</a>
+          <a href="/register" id="nav-register" class="bb-btn-primary">Register</a>
+          {% endif %}
+        </div>
+      </nav>
+    </header>
+
+    <!-- ── Page content ──────────────────────────────────────────────────── -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 animate-fade-in">
+      {% block content %}{% endblock %}
+    </main>
+
+    <!-- ── Footer ────────────────────────────────────────────────────────── -->
+    <footer
+      style="border-top:1px solid #2a2a38;margin-top:5rem;padding:2rem 0;text-align:center;color:#44445a;font-size:0.8rem;">
+      <div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div class="flex items-center gap-2">
+          <div class="w-5 h-5 rounded flex items-center justify-center text-xs font-bold text-white"
+            style="background:linear-gradient(135deg,#6c47ff,#9070ff);">B</div>
+          <span>BookBridge &mdash; Campus Book Exchange</span>
+        </div>
+        <span>&copy; 2025 &middot; Made for students</span>
+      </div>
+    </footer>
+
+    <!-- ── BookBot floating widget ───────────────────────────────────────── -->
+    <div id="bookbot" class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-3">
+
+      <!-- Chat panel -->
+      <div id="bbPanel"
+        class="hidden w-80 sm:w-96 glass rounded-2xl shadow-card flex flex-col overflow-hidden animate-slide-up"
+        style="max-height:500px;">
+        <!-- Header -->
+        <div class="flex items-center justify-between px-4 py-3 shrink-0"
+          style="background:linear-gradient(135deg,#6c47ff,#5238e8);border-bottom:1px solid rgba(255,255,255,0.1);">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm text-white"
+              style="background:rgba(255,255,255,0.15);">🤖</div>
+            <div>
+              <p class="text-sm font-semibold text-white leading-tight">BookBot</p>
+              <p class="text-xs leading-tight" style="color:rgba(255,255,255,0.6);">Find books on campus</p>
+            </div>
+          </div>
+          <button id="bbClose" class="p-1.5 rounded-lg transition-colors hover:bg-white/10">
+            <svg class="w-4 h-4 text-white/70" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Messages -->
+        <div id="bbMessages" class="flex-1 overflow-y-auto p-4 space-y-3 text-sm" style="background:#0f0f14;">
+          <div class="flex gap-2">
+            <div class="w-7 h-7 rounded-full flex items-center justify-center text-xs shrink-0 mt-0.5"
+              style="background:linear-gradient(135deg,#6c47ff,#9070ff);">🤖</div>
+            <div class="rounded-xl px-3 py-2.5 text-sm max-w-[85%]"
+              style="background:#1c1c27;border:1px solid #2a2a38;color:#c8c8e0;">
+              Hey! 👋 Ask me anything — like <em class="text-purple-400">"Do you have Cormen?"</em> or <em
+                class="text-purple-400">"I need a CS301 book"</em>
+            </div>
+          </div>
+        </div>
+
+        <!-- Input -->
+        <div class="shrink-0 p-3" style="background:#16161e;border-top:1px solid #2a2a38;">
+          <form id="bbForm" class="flex gap-2">
+            <input id="bbInput" type="text" placeholder="Ask about a book..." class="bb-input flex-1"
+              style="padding:0.5rem 0.75rem;" />
+            <button type="submit" class="bb-btn-primary px-3 py-2 text-xs shrink-0" style="border-radius:0.5rem;">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+              </svg>
+            </button>
+          </form>
+        </div>
+      </div>
+
+      <!-- FAB button -->
+      <button id="bbToggle" id="bookbot-toggle"
+        class="w-14 h-14 rounded-full flex items-center justify-center shadow-glow transition-all duration-200 hover:scale-105 active:scale-95"
+        style="background:linear-gradient(135deg,#6c47ff,#5238e8);">
+        <svg id="bbIconOpen" class="w-6 h-6 text-white" fill="none" stroke="currentColor" stroke-width="2"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z" />
+        </svg>
+        <svg id="bbIconClose" class="w-6 h-6 text-white hidden" fill="none" stroke="currentColor" stroke-width="2"
+          viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+
+    <script>
+      const bbPanel = document.getElementById('bbPanel');
+      const bbToggle = document.getElementById('bbToggle');
+      const bbClose = document.getElementById('bbClose');
+      const bbForm = document.getElementById('bbForm');
+      const bbInput = document.getElementById('bbInput');
+      const bbMsgs = document.getElementById('bbMessages');
+      const iconOpen = document.getElementById('bbIconOpen');
+      const iconClose = document.getElementById('bbIconClose');
+
+      function togglePanel(open) {
+        bbPanel.classList.toggle('hidden', !open);
+        iconOpen.classList.toggle('hidden', open);
+        iconClose.classList.toggle('hidden', !open);
+        if (open) { bbInput.focus(); scrollMsgs(); }
+      }
+
+      bbToggle.addEventListener('click', () => togglePanel(bbPanel.classList.contains('hidden')));
+      bbClose.addEventListener('click', () => togglePanel(false));
+
+      function scrollMsgs() { bbMsgs.scrollTop = bbMsgs.scrollHeight; }
+
+      function addBubble(role, html, streaming = false) {
+        const wrap = document.createElement('div');
+        wrap.className = 'flex gap-2' + (role === 'user' ? ' flex-row-reverse' : '');
+
+        const avatar = document.createElement('div');
+        avatar.className = 'w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 mt-0.5';
+        avatar.style.cssText = role === 'user'
+          ? 'background:#2a2a38;color:#a0a0c0;'
+          : 'background:linear-gradient(135deg,#6c47ff,#9070ff);color:#fff;';
+        avatar.textContent = role === 'user' ? '👤' : '🤖';
+
+        const bubble = document.createElement('div');
+        bubble.className = 'rounded-xl px-3 py-2.5 max-w-[85%] text-sm';
+        bubble.style.cssText = role === 'user'
+          ? 'background:linear-gradient(135deg,#6c47ff,#5238e8);color:#fff;'
+          : 'background:#1c1c27;border:1px solid #2a2a38;color:#c8c8e0;';
+        if (streaming) bubble.id = 'bbStreaming';
+        bubble.innerHTML = html;
+
+        wrap.appendChild(avatar);
+        wrap.appendChild(bubble);
+        bbMsgs.appendChild(wrap);
+        scrollMsgs();
+        return bubble;
+      }
+
+      function linkify(text) {
+        return text
+          .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+          .replace(/\/listing\/(\d+)/g,
+            '<a href="/listing/$1" style="color:#a5b4fc;text-decoration:underline;font-weight:600;">/listing/$1</a>');
+      }
+
+      bbForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const q = bbInput.value.trim();
+        if (!q) return;
+        bbInput.value = '';
+        addBubble('user', q.replace(/</g, '&lt;'));
+
+        const botBubble = addBubble('bot', '<span style="color:#4a4a65;animation:pulse 1.5s infinite;">Thinking…</span>', true);
+        let fullText = '';
+
+        try {
+          const res = await fetch('/api/chatbot/stream?q=' + encodeURIComponent(q));
+          if (!res.ok) throw new Error('bad response');
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          botBubble.innerHTML = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            fullText += decoder.decode(value, { stream: true });
+            botBubble.innerHTML = linkify(fullText);
+            scrollMsgs();
+          }
+          botBubble.innerHTML = linkify(fullText);
+        } catch {
+          botBubble.innerHTML = '<span style="color:#f87171;">Couldn\'t reach BookBot right now. Try again!</span>';
+        }
+        scrollMsgs();
+      });
+    </script>
+
+    <!-- Notification badge polling (every 30s) -->
+    {% if request.state.user %}
+    <script>
+      const notifBadge = document.getElementById('notif-badge');
+      async function pollNotifications() {
+        try {
+          const res = await fetch('/api/notifications/count');
+          const data = await res.json();
+          if (data.unread > 0) {
+            notifBadge.textContent = data.unread > 9 ? '9+' : data.unread;
+            notifBadge.classList.remove('hidden');
+          } else {
+            notifBadge.classList.add('hidden');
+          }
+        } catch { }
+      }
+      pollNotifications();
+      setInterval(pollNotifications, 30000);
+    </script>
+    {% endif %}
+
+  </div><!-- /page-wrap -->
+  {% block extra_scripts %}{% endblock %}
+</body>
+
+</html>

@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+{% block title %}Notifications — BookBridge{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+  <div class="flex items-center justify-between mb-7">
+    <div>
+      <h1 class="font-display font-bold text-2xl text-white">Notifications</h1>
+      {% set unread = notifs | selectattr('is_read', 'equalto', false) | list | length %}
+      {% if unread > 0 %}
+      <p class="text-sm mt-1" style="color:#5a5a80;"><span style="color:#a5b4fc;">{{ unread }}</span> unread</p>
+      {% endif %}
+    </div>
+    {% if notifs %}
+    <form method="post" action="/notifications/read-all">
+      <button type="submit" class="bb-btn-ghost text-sm" id="notif-read-all">Mark all read</button>
+    </form>
+    {% endif %}
+  </div>
+
+  {% if notifs %}
+  <div class="space-y-2">
+    {% for n in notifs %}
+    <div class="flex items-start gap-4 px-4 py-3.5 rounded-xl transition-all"
+      style="background:{% if not n.is_read %}rgba(108,71,255,0.07);border:1px solid rgba(108,71,255,0.15){% else %}#16161e;border:1px solid #1e1e2e{% endif %};"
+      id="notif-{{ n.id }}">
+
+      <!-- Dot indicator -->
+      <div class="mt-1 shrink-0">
+        {% if not n.is_read %}
+        <div class="w-2 h-2 rounded-full" style="background:#6c47ff;"></div>
+        {% else %}
+        <div class="w-2 h-2 rounded-full" style="background:#2a2a38;"></div>
+        {% endif %}
+      </div>
+
+      <!-- Content -->
+      <div class="flex-1 min-w-0">
+        {% if n.link %}
+        <a href="{{ n.link }}" class="text-sm transition-colors hover:text-purple-300 {% if not n.is_read %}font-medium{% endif %}"
+          style="color:{% if not n.is_read %}#e8e8f0{% else %}#8888a8{% endif %};">
+          {{ n.message }}
+        </a>
+        {% else %}
+        <p class="text-sm {% if not n.is_read %}font-medium{% endif %}"
+          style="color:{% if not n.is_read %}#e8e8f0{% else %}#8888a8{% endif %};">
+          {{ n.message }}
+        </p>
+        {% endif %}
+        <p class="text-xs mt-0.5" style="color:#3a3a55;">{{ n.created_at.strftime('%b %d, %Y · %H:%M') if n.created_at else '' }}</p>
+      </div>
+
+      <!-- Mark read button -->
+      {% if not n.is_read %}
+      <form method="post" action="/notifications/{{ n.id }}/read" class="shrink-0">
+        <button type="submit" class="text-xs transition-colors hover:text-purple-300" style="color:#44445a;" id="notif-read-{{ n.id }}">✓</button>
+      </form>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <div class="flex flex-col items-center justify-center py-24 text-center animate-fade-in">
+    <div class="w-20 h-20 rounded-2xl flex items-center justify-center mb-5" style="background:#1c1c27;border:1px solid #2a2a38;">
+      <svg class="w-9 h-9" style="color:#2a2a50;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0"/>
+      </svg>
+    </div>
+    <h2 class="text-lg font-semibold mb-2" style="color:#8888a8;">All caught up!</h2>
+    <p class="text-sm" style="color:#44445a;">No notifications yet. Activity will appear here.</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

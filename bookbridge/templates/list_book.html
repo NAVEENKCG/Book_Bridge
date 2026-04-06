@@ -1,0 +1,234 @@
+{% extends "base.html" %}
+{% block title %}List a Book — BookBridge{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+
+  <!-- Page header -->
+  <div class="mb-7">
+    <h1 class="font-display font-bold text-2xl text-white">List a Book</h1>
+    <p class="text-sm mt-1.5" style="color:#5a5a80;">
+      Earn <span class="font-semibold" style="color:#fbbf24;">+10 BookCoins</span> when your listing goes live.
+    </p>
+  </div>
+
+  <div class="bb-card p-8">
+    <form method="post" action="/list" id="listForm" class="space-y-6">
+
+      <!-- ISBN auto-fill -->
+      <div class="p-4 rounded-xl" style="background:rgba(108,71,255,0.08);border:1px solid rgba(108,71,255,0.2);">
+        <label class="block text-sm font-semibold mb-2" style="color:#c4b5fd;" for="isbn">
+          🔍 ISBN Auto-fill
+        </label>
+        <p class="text-xs mb-3" style="color:#5a5a80;">Enter the ISBN to automatically fill in book details.</p>
+        <div class="flex gap-2">
+          <input id="isbn" name="isbn" type="text" placeholder="e.g. 9780262033848"
+            class="bb-input flex-1" style="background:rgba(28,28,39,0.8);" />
+          <button type="button" id="isbnFetchBtn" class="bb-btn-primary text-sm px-4 whitespace-nowrap">
+            Fetch Info
+          </button>
+        </div>
+        <p id="isbnStatus" class="text-xs mt-2 hidden" style="color:#a5b4fc;"></p>
+      </div>
+
+      <!-- Hidden cover URL -->
+      <input type="hidden" name="cover_url" id="cover_url_field" />
+
+      <!-- Cover preview (shown after ISBN fetch) -->
+      <div id="coverPreview" class="hidden flex items-center gap-4 p-4 rounded-xl" style="background:#1c1c27;border:1px solid #2a2a38;">
+        <img id="coverImg" src="" alt="Cover preview" class="h-24 object-contain rounded-lg" />
+        <div id="coverMeta" class="text-sm" style="color:#9898b8;"></div>
+      </div>
+
+      <!-- Title + Author -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color:#9898b8;" for="title">
+            Title <span style="color:#f87171;">*</span>
+          </label>
+          <input id="title" name="title" type="text" required placeholder="Introduction to Algorithms"
+            class="bb-input" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color:#9898b8;" for="author">Author</label>
+          <input id="author" name="author" type="text" placeholder="Cormen, Leiserson..."
+            class="bb-input" />
+        </div>
+      </div>
+
+      <!-- Publisher + Edition -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color:#9898b8;" for="publisher">Publisher</label>
+          <input id="publisher" name="publisher" type="text" placeholder="MIT Press"
+            class="bb-input" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color:#9898b8;" for="edition">Edition</label>
+          <input id="edition" name="edition" type="text" placeholder="3rd Edition"
+            class="bb-input" />
+        </div>
+      </div>
+
+      <!-- Divider -->
+      <div style="border-top:1px solid #2a2a38;"></div>
+
+      <!-- Condition + Price + Exchange -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color:#9898b8;" for="condition">
+            Condition <span style="color:#f87171;">*</span>
+          </label>
+          <select id="condition" name="condition" required class="bb-input">
+            {% for c in conditions %}
+            <option value="{{ c }}">{{ c }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color:#9898b8;" for="price">
+            Price (₹) <span class="font-normal" style="color:#44445a;">— blank = negotiate</span>
+          </label>
+          <input id="price" name="price" type="number" min="0" placeholder="e.g. 250"
+            class="bb-input" />
+        </div>
+        <div class="flex flex-col justify-end pb-1">
+          <label class="flex items-center gap-2.5 cursor-pointer select-none">
+            <div class="relative">
+              <input type="checkbox" name="is_exchange" id="is_exchange" value="on" class="sr-only peer" />
+              <div class="w-10 h-5 rounded-full transition-colors" style="background:#2a2a38;" id="exchange-toggle-bg"></div>
+              <div class="absolute left-0.5 top-0.5 w-4 h-4 rounded-full bg-white transition-transform peer-checked:translate-x-5" id="exchange-toggle-knob"></div>
+            </div>
+            <span class="text-sm font-medium" style="color:#9898b8;">Open to Exchange</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- AI Price suggestion -->
+      <div id="priceSuggestBox" class="hidden p-4 rounded-xl" style="background:rgba(245,158,11,0.08);border:1px solid rgba(245,158,11,0.2);">
+        <div class="flex items-center gap-2 font-semibold text-sm mb-1" style="color:#fbbf24;">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+          AI Price Suggestion
+        </div>
+        <p id="priceSuggestText" class="text-sm" style="color:#d4a240;"></p>
+      </div>
+
+      <button type="button" id="priceSuggestBtn"
+        class="text-sm font-medium transition-colors" style="color:#6c47ff;">
+        ✨ Get AI price suggestion
+      </button>
+
+      <!-- Divider -->
+      <div style="border-top:1px solid #2a2a38;"></div>
+
+      <!-- Course + Semester -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color:#9898b8;" for="course_code">Course Code</label>
+          <input id="course_code" name="course_code" type="text" placeholder="CS301"
+            class="bb-input" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color:#9898b8;" for="semester">Semester</label>
+          <select id="semester" name="semester" class="bb-input">
+            <option value="">-- Any --</option>
+            {% for s in range(1, 9) %}
+            <option value="{{ s }}">Semester {{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <!-- Notes -->
+      <div>
+        <label class="block text-sm font-medium mb-2" style="color:#9898b8;" for="description">Notes / Description</label>
+        <textarea id="description" name="description" rows="3"
+          placeholder="Any highlights, dog-ears, handwritten notes inside..."
+          class="bb-input resize-none" style="height:auto;"></textarea>
+      </div>
+
+      <!-- Submit -->
+      <div class="flex items-center justify-between pt-2">
+        <p class="text-xs" style="color:#44445a;">Fields marked <span style="color:#f87171;">*</span> are required</p>
+        <button type="submit" id="list-submit" class="bb-btn-primary px-8">
+          🚀 Create Listing
+        </button>
+      </div>
+
+    </form>
+  </div>
+</div>
+
+<script>
+  // ── Toggle switch visual ───────────────────────────────────────────────────
+  const cbExchange = document.getElementById('is_exchange');
+  const toggleBg   = document.getElementById('exchange-toggle-bg');
+  cbExchange.addEventListener('change', () => {
+    toggleBg.style.background = cbExchange.checked ? '#6c47ff' : '#2a2a38';
+  });
+
+  // ── ISBN auto-fill ────────────────────────────────────────────────────────
+  const isbnInput  = document.getElementById('isbn');
+  const fetchBtn   = document.getElementById('isbnFetchBtn');
+  const statusEl   = document.getElementById('isbnStatus');
+  const coverWrap  = document.getElementById('coverPreview');
+  const coverImg   = document.getElementById('coverImg');
+  const coverMeta  = document.getElementById('coverMeta');
+
+  async function fetchISBN() {
+    const isbn = isbnInput.value.trim();
+    if (!isbn) return;
+    statusEl.textContent = '⏳ Fetching book info…';
+    statusEl.classList.remove('hidden');
+    fetchBtn.disabled = true;
+    try {
+      const res  = await fetch(`/api/isbn/${encodeURIComponent(isbn)}`);
+      const data = await res.json();
+      if (data.title)                                        document.getElementById('title').value     = data.title;
+      if (data.authors && data.authors.length)               document.getElementById('author').value    = data.authors.join(', ');
+      if (data.publisher)                                    document.getElementById('publisher').value = data.publisher;
+      if (data.edition)                                      document.getElementById('edition').value   = data.edition;
+      if (data.cover_url) {
+        document.getElementById('cover_url_field').value = data.cover_url;
+        coverImg.src = data.cover_url;
+        coverMeta.innerHTML = `<strong style="color:#e8e8f0;">${data.title || ''}</strong><br/><span style="color:#44445a;">${(data.authors||[]).join(', ')}</span>`;
+        coverWrap.classList.remove('hidden');
+        coverWrap.classList.add('flex');
+      }
+      statusEl.textContent = data.title ? '✅ Book info filled in!' : '⚠️ No info found for that ISBN.';
+    } catch {
+      statusEl.textContent = '❌ Could not fetch book info.';
+    }
+    fetchBtn.disabled = false;
+  }
+
+  fetchBtn.addEventListener('click', fetchISBN);
+  isbnInput.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); fetchISBN(); } });
+
+  // ── AI Price suggestion ────────────────────────────────────────────────────
+  document.getElementById('priceSuggestBtn').addEventListener('click', async () => {
+    const title     = document.getElementById('title').value.trim();
+    const edition   = document.getElementById('edition').value.trim();
+    const condition = document.getElementById('condition').value;
+    if (!title) { alert('Please fill in the title first.'); return; }
+
+    const box = document.getElementById('priceSuggestBox');
+    const txt = document.getElementById('priceSuggestText');
+    txt.textContent = '✨ Asking AI for a price estimate…';
+    box.classList.remove('hidden');
+
+    try {
+      const res  = await fetch('/api/price-suggest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, edition, condition }),
+      });
+      const data = await res.json();
+      txt.textContent = `Suggested range: ₹${data.min} – ₹${data.max}. ${data.reason}`;
+      document.getElementById('price').value = Math.round((data.min + data.max) / 2);
+    } catch {
+      txt.textContent = 'Could not get AI suggestion right now.';
+    }
+  });
+</script>
+{% endblock %}

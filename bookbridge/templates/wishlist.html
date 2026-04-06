@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block title %}My Wishlist — BookBridge{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-between mb-7">
+  <div>
+    <h1 class="font-display font-bold text-2xl text-white">My Wishlist</h1>
+    <p class="text-sm mt-1" style="color:#5a5a80;">{{ listings|length }} saved listing{{ 's' if listings|length != 1 }}</p>
+  </div>
+  <a href="/" id="wishlist-browse" class="bb-btn-ghost text-sm">Browse More</a>
+</div>
+
+{% if listings %}
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+  {% for l in listings %}
+  <div class="book-card group flex flex-col relative">
+    <!-- Remove heart -->
+    <form method="post" action="/wishlist/{{ l.id }}/remove" class="absolute top-2 right-2 z-10" id="wishlist-remove-{{ l.id }}">
+      <button type="submit" class="w-7 h-7 rounded-full flex items-center justify-center" style="background:rgba(239,68,68,0.15);border:1px solid rgba(239,68,68,0.25);">
+        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20" style="color:#f87171;"><path fill-rule="evenodd" d="M3.172 5.172a4 4 0 015.656 0L10 6.343l1.172-1.171a4 4 0 115.656 5.656L10 17.657l-6.828-6.829a4 4 0 010-5.656z" clip-rule="evenodd"/></svg>
+      </button>
+    </form>
+
+    <a href="/listing/{{ l.id }}" class="flex flex-col h-full">
+      <div class="relative overflow-hidden flex items-center justify-center w-full" style="height:10rem;background:#1c1c27;">
+        {% if l.cover_url %}
+        <img src="{{ l.cover_url }}" alt="{{ l.title }}" class="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105" />
+        {% else %}
+        <svg class="w-10 h-10" style="color:#2a2a50;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292M12 6.042A8.966 8.966 0 0118 3.75c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292M12 6.042v16.25"/></svg>
+        {% endif %}
+        {% set cc = {"New":"cond-new","Like New":"cond-likenew","Good":"cond-good","Fair":"cond-fair","Poor":"cond-poor"} %}
+        <div class="absolute top-2 left-2"><span class="bb-badge {{ cc.get(l.condition, 'cond-good') }}">{{ l.condition }}</span></div>
+      </div>
+      <div class="p-3 flex flex-col gap-1 flex-1">
+        <h3 class="font-semibold text-sm leading-snug truncate group-hover:text-purple-300 transition-colors" style="color:#e8e8f0;">{{ l.title }}</h3>
+        <p class="text-xs truncate" style="color:#44445a;">{{ l.author or '' }}</p>
+        <div class="flex items-center justify-between mt-auto pt-2 border-t" style="border-color:#1e1e2e;">
+          {% if l.price %}<span class="font-bold text-sm" style="color:#e8e8f0;">₹{{ l.price }}</span>
+          {% else %}<span class="text-xs font-semibold" style="color:#a5b4fc;">Exchange</span>{% endif %}
+        </div>
+      </div>
+    </a>
+  </div>
+  {% endfor %}
+</div>
+
+{% else %}
+<div class="flex flex-col items-center justify-center py-28 text-center animate-fade-in">
+  <div class="w-20 h-20 rounded-2xl flex items-center justify-center mb-5" style="background:#1c1c27;border:1px solid #2a2a38;">
+    <svg class="w-9 h-9" style="color:#2a2a50;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>
+  </div>
+  <h2 class="text-lg font-semibold mb-2" style="color:#8888a8;">No saved listings yet</h2>
+  <p class="text-sm mb-7" style="color:#44445a;">Browse listings and tap the ♥ to save them here.</p>
+  <a href="/" class="bb-btn-primary" id="wishlist-empty-cta">Browse Books</a>
+</div>
+{% endif %}
+{% endblock %}

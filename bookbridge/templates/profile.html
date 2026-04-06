@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}{{ target.name }} — BookBridge{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6 animate-slide-up">
+
+  <!-- Profile hero card -->
+  <div class="bb-card overflow-hidden">
+    <!-- Top banner -->
+    <div class="h-24 relative" style="background:linear-gradient(135deg,#1a1030,#12102a,#0d1420);">
+      <div class="absolute inset-0" style="background:radial-gradient(ellipse at 20% 50%,rgba(108,71,255,0.25),transparent 60%);"></div>
+    </div>
+
+    <div class="px-7 pb-7">
+      <!-- Avatar (overlaps banner) -->
+      <div class="-mt-10 mb-4 flex items-end justify-between">
+        <div class="w-20 h-20 rounded-2xl flex items-center justify-center font-display font-bold text-3xl text-white shadow-glow" style="background:linear-gradient(135deg,#6c47ff,#9070ff);border:3px solid #0f0f14;">
+          {{ target.name[0].upper() }}
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          {% if target.exchange_count >= 5 %}
+          <span class="bb-badge" style="background:rgba(108,71,255,0.12);color:#c4b5fd;border:1px solid rgba(108,71,255,0.2);">✅ Verified Exchanger</span>
+          {% endif %}
+          {% if is_own %}
+          <a href="/profile/edit" id="profile-edit-btn" class="bb-btn-ghost text-xs px-3 py-1.5">✏️ Edit Profile</a>
+          <a href="/change-password" id="profile-change-pass-btn" class="bb-btn-ghost text-xs px-3 py-1.5">🔑 Password</a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- Name + info -->
+      <div class="mb-5">
+        <h1 class="font-display font-bold text-xl text-white">{{ target.name }}</h1>
+        <p class="text-sm mt-0.5" style="color:#5a5a80;">{{ target.email }}</p>
+        {% if target.college %}
+        <p class="text-sm mt-1" style="color:#5a5a80;">
+          🏛 {{ target.college }}
+          {% if target.department %} &middot; {{ target.department }}{% endif %}
+          {% if target.semester %} &middot; Sem {{ target.semester }}{% endif %}
+        </p>
+        {% endif %}
+        <p class="text-xs mt-1.5" style="color:#2a2a50;">Member since {{ target.created_at.strftime('%b %Y') if target.created_at else 'recently' }}</p>
+      </div>
+
+      <!-- Stats row -->
+      <div class="grid grid-cols-3 gap-4 pt-5" style="border-top:1px solid #2a2a38;">
+
+        <div class="text-center p-3 rounded-xl" style="background:#1c1c27;border:1px solid #2a2a38;">
+          <p class="text-2xl font-bold" style="color:#fbbf24;">{{ target.bookcoin_bal }}</p>
+          <p class="text-xs mt-1" style="color:#44445a;">🪙 BookCoins</p>
+        </div>
+
+        <div class="text-center p-3 rounded-xl" style="background:#1c1c27;border:1px solid #2a2a38;">
+          <div class="flex items-center justify-center gap-1 text-2xl font-bold" style="color:#fbbf24;">
+            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
+            {{ target.rating }}
+          </div>
+          <p class="text-xs mt-1" style="color:#44445a;">Rating</p>
+        </div>
+
+        <div class="text-center p-3 rounded-xl" style="background:#1c1c27;border:1px solid #2a2a38;">
+          <p class="text-2xl font-bold" style="color:#a5b4fc;">{{ target.exchange_count }}</p>
+          <p class="text-xs mt-1" style="color:#44445a;">📦 Exchanges</p>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Active listings -->
+  {% if listings %}
+  <div>
+    <h2 class="text-base font-semibold mb-4 text-white">Active Listings</h2>
+    <div class="grid grid-cols-2 sm:grid-cols-3 gap-4">
+      {% for l in listings %}
+      <a href="/listing/{{ l.id }}" class="book-card group flex flex-col" id="profile-listing-{{ l.id }}">
+        <div class="h-28 flex items-center justify-center overflow-hidden" style="background:#1c1c27;">
+          {% if l.cover_url %}
+          <img src="{{ l.cover_url }}" alt="{{ l.title }}" class="h-full object-contain group-hover:scale-105 transition-transform" />
+          {% else %}
+          <svg class="w-7 h-7" style="color:#2a2a50;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292M12 6.042A8.966 8.966 0 0118 3.75c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292M12 6.042v16.25"/></svg>
+          {% endif %}
+        </div>
+        <div class="p-3 border-t" style="border-color:#2a2a38;">
+          <p class="text-xs font-semibold truncate group-hover:text-purple-300 transition-colors" style="color:#e8e8f0;">{{ l.title }}</p>
+          <p class="text-xs mt-0.5" style="color:#44445a;">{% if l.price %}₹{{ l.price }}{% else %}Exchange{% endif %}</p>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

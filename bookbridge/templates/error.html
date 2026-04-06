@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% block title %}{{ code }} Error — BookBridge{% endblock %}
+
+{% block content %}
+<div class="min-h-[70vh] flex items-center justify-center">
+  <div class="text-center max-w-sm animate-slide-up">
+
+    <!-- Error icon -->
+    <div class="inline-flex items-center justify-center w-24 h-24 rounded-3xl mb-8" style="background:rgba(108,71,255,0.08);border:1px solid rgba(108,71,255,0.15);">
+      <span class="font-display font-black text-4xl" style="color:#3a3a55;">{{ code }}</span>
+    </div>
+
+    <h1 class="font-display font-bold text-2xl text-white mb-2">
+      {% if code == 404 %}Page not found
+      {% elif code == 403 %}Access denied
+      {% else %}Something went wrong
+      {% endif %}
+    </h1>
+    <p class="text-sm mb-8" style="color:#5a5a80;">{{ message }}</p>
+
+    <div class="flex items-center justify-center gap-3">
+      <a href="/" id="error-home-btn" class="bb-btn-primary">
+        Go Home
+      </a>
+      <a href="javascript:history.back()" id="error-back-btn" class="bb-btn-ghost">
+        Go Back
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

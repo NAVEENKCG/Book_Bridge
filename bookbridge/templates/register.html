@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% block title %}Register — BookBridge{% endblock %}
+
+{% block content %}
+<div class="min-h-[78vh] flex items-center justify-center py-12">
+  <div class="w-full max-w-md animate-slide-up">
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4" style="background:linear-gradient(135deg,#6c47ff,#9070ff);box-shadow:0 8px 24px rgba(108,71,255,0.35);">
+        <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292M12 6.042A8.966 8.966 0 0118 3.75c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292M12 6.042v16.25"/>
+        </svg>
+      </div>
+      <h1 class="font-display font-bold text-2xl text-white">Create your account</h1>
+      <p class="text-sm mt-1.5" style="color:#5a5a80;">Use your institutional email to join the campus marketplace</p>
+    </div>
+
+    <!-- Incentive banner -->
+    <div class="flex items-center gap-3 px-4 py-3 rounded-xl mb-6" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.2);">
+      <span class="text-xl">🪙</span>
+      <p class="text-sm" style="color:#fbbf24;">Earn <strong>50 BookCoins</strong> just for signing up. Use them to unlock features!</p>
+    </div>
+
+    {% if error %}
+    <div class="mb-5 px-4 py-3 rounded-xl text-sm flex items-center gap-2" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#f87171;">
+      <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>
+      {{ error }}
+    </div>
+    {% endif %}
+
+    <div class="bb-card p-8">
+      <form method="post" action="/register" class="space-y-5">
+
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color:#9898b8;" for="name">Full Name</label>
+          <input id="name" name="name" type="text" required placeholder="Priya Sharma"
+            class="bb-input" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color:#9898b8;" for="email">Institutional Email</label>
+          <input id="email" name="email" type="email" required placeholder="you@college.ac.in"
+            class="bb-input" />
+          <p class="text-xs mt-1.5" style="color:#3a3a55;">Only .ac.in and .edu emails are accepted.</p>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color:#9898b8;" for="password">Password</label>
+          <input id="password" name="password" type="password" required placeholder="Min 8 characters"
+            class="bb-input" />
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-sm font-medium mb-2" style="color:#9898b8;" for="college">College</label>
+            <input id="college" name="college" type="text" placeholder="ABC Engineering"
+              class="bb-input" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium mb-2" style="color:#9898b8;" for="department">Department</label>
+            <input id="department" name="department" type="text" placeholder="CSE"
+              class="bb-input" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium mb-2" style="color:#9898b8;" for="semester">Semester</label>
+          <select id="semester" name="semester" class="bb-input">
+            <option value="">-- Select semester --</option>
+            {% for s in range(1, 9) %}
+            <option value="{{ s }}">Semester {{ s }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <button type="submit" id="register-submit" class="bb-btn-primary w-full py-2.5 mt-1" style="font-size:0.9rem;">
+          🚀 Create Account — Earn 50 BookCoins
+        </button>
+      </form>
+    </div>
+
+    <p class="text-center text-sm mt-6" style="color:#44445a;">
+      Already have an account? <a href="/login" class="font-semibold transition-colors" style="color:#a5b4fc;" id="register-login-link">Sign in</a>
+    </p>
+  </div>
+</div>
+{% endblock %}

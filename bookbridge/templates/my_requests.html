@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% block title %}My Requests — BookBridge{% endblock %}
+
+{% block content %}
+
+<h1 class="font-display font-bold text-2xl text-white mb-7">My Requests</h1>
+
+<!-- Tabs -->
+<div class="flex gap-1 p-1 rounded-xl w-fit mb-7" style="background:#1c1c27;border:1px solid #2a2a38;">
+  <button onclick="showTab('buying')" id="tab-buying"
+    class="px-5 py-2 text-sm font-semibold rounded-lg transition-all"
+    style="background:linear-gradient(135deg,#6c47ff,#5238e8);color:#fff;box-shadow:0 4px 14px rgba(108,71,255,0.3);">
+    📥 Buying ({{ outgoing|length }})
+  </button>
+  <button onclick="showTab('selling')" id="tab-selling"
+    class="px-5 py-2 text-sm font-semibold rounded-lg transition-all"
+    style="background:transparent;color:#5a5a80;">
+    📤 Selling ({{ incoming|length }})
+  </button>
+</div>
+
+{% macro request_table(requests, is_seller) %}
+{% if requests %}
+<div class="bb-card overflow-hidden animate-fade-in">
+  <table class="w-full text-sm">
+    <thead style="background:#1c1c27;border-bottom:1px solid #2a2a38;">
+      <tr>
+        <th class="text-left px-5 py-3.5 font-semibold" style="color:#5a5a80;">Book</th>
+        <th class="text-left px-5 py-3.5 font-semibold hidden sm:table-cell" style="color:#5a5a80;">{{ "Buyer" if is_seller else "Seller" }}</th>
+        <th class="text-left px-5 py-3.5 font-semibold" style="color:#5a5a80;">Status</th>
+        <th class="px-5 py-3.5"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for r in requests %}
+      <tr class="border-t transition-colors" style="border-color:#1e1e2e;" onmouseover="this.style.background='#1c1c27'" onmouseout="this.style.background='transparent'">
+        <td class="px-5 py-4">
+          <a href="/listing/{{ r.listing.id }}" class="font-medium transition-colors hover:text-purple-400 block truncate max-w-xs" style="color:#e8e8f0;">{{ r.listing.title }}</a>
+          {% if r.listing.course_code %}
+          <p class="text-xs mt-0.5" style="color:#44445a;">{{ r.listing.course_code }}</p>
+          {% endif %}
+        </td>
+        <td class="px-5 py-4 hidden sm:table-cell" style="color:#8888a8;">
+          {% if is_seller %}
+          <a href="/profile/{{ r.requester.id }}" class="transition-colors hover:text-purple-400">{{ r.requester.name }}</a>
+          {% else %}
+          <a href="/profile/{{ r.seller.id }}" class="transition-colors hover:text-purple-400">{{ r.seller.name }}</a>
+          {% endif %}
+        </td>
+        <td class="px-5 py-4">
+          <span class="bb-badge status-{{ r.status }}">{{ r.status | capitalize }}</span>
+        </td>
+        <td class="px-5 py-4 text-right">
+          <a href="/chat/{{ r.id }}" class="text-xs font-semibold transition-colors hover:text-purple-300" style="color:#a5b4fc;">💬 Open Chat</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% else %}
+<div class="bb-card px-8 py-16 text-center animate-fade-in">
+  <p class="text-sm" style="color:#44445a;">No requests here yet.</p>
+</div>
+{% endif %}
+{% endmacro %}
+
+<div id="tab-buying-content">{{ request_table(outgoing, false) }}</div>
+<div id="tab-selling-content" class="hidden">{{ request_table(incoming, true) }}</div>
+
+<script>
+  function showTab(name) {
+    const activeStyle = 'background:linear-gradient(135deg,#6c47ff,#5238e8);color:#fff;box-shadow:0 4px 14px rgba(108,71,255,0.3);';
+    const inactiveStyle = 'background:transparent;color:#5a5a80;box-shadow:none;';
+    ['buying', 'selling'].forEach(t => {
+      const content = document.getElementById(`tab-${t}-content`);
+      const btn     = document.getElementById(`tab-${t}`);
+      const isActive = t === name;
+      content.classList.toggle('hidden', !isActive);
+      btn.style.cssText = isActive ? activeStyle : inactiveStyle;
+    });
+  }
+</script>
+
+{% endblock %}

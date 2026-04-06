@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+{% block title %}Wanted Board — BookBridge{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto">
+
+  <!-- Header -->
+  <div class="mb-7">
+    <h1 class="font-display font-bold text-2xl text-white">Wanted Board</h1>
+    <p class="text-sm mt-1.5" style="color:#5a5a80;">
+      Post a book you need so sellers can find you directly.
+    </p>
+  </div>
+
+  <!-- Post form -->
+  {% if request.state.user %}
+  <div class="bb-card p-6 mb-7">
+    <h2 class="text-sm font-semibold mb-4" style="color:#a5b4fc;">✍ Post a Wanted Request</h2>
+    <form method="post" action="/wanted/add" class="flex flex-col sm:flex-row gap-3" id="wanted-add-form">
+      <input name="book_title" type="text" required placeholder="Book title (e.g. Data Structures by Cormen)"
+        class="bb-input flex-1" id="wanted-title" />
+      <input name="course_code" type="text" placeholder="Course code"
+        class="bb-input" style="width:8rem;" id="wanted-course" />
+      <div class="relative" style="width:7rem;">
+        <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs" style="color:#4a4a65;">₹</span>
+        <input name="max_price" type="number" min="0" placeholder="Max"
+          class="bb-input pl-6 w-full" id="wanted-max-price" />
+      </div>
+      <button type="submit" class="bb-btn-primary whitespace-nowrap" id="wanted-submit">
+        Post Request
+      </button>
+    </form>
+  </div>
+  {% else %}
+  <div class="flex items-center gap-3 px-5 py-4 rounded-xl mb-7" style="background:rgba(108,71,255,0.08);border:1px solid rgba(108,71,255,0.2);">
+    <svg class="w-5 h-5 shrink-0" style="color:#6c47ff;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 10.5V6.75a4.5 4.5 0 10-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 002.25-2.25v-6.75a2.25 2.25 0 00-2.25-2.25H6.75a2.25 2.25 0 00-2.25 2.25v6.75a2.25 2.25 0 002.25 2.25z"/></svg>
+    <p class="text-sm" style="color:#8888a8;"><a href="/login" class="font-semibold transition-colors hover:text-purple-300" style="color:#c4b5fd;">Sign in</a> to post a wanted request.</p>
+  </div>
+  {% endif %}
+
+  <!-- Posts list -->
+  {% if posts %}
+  <div class="space-y-3">
+    {% for p in posts %}
+    <div class="bb-card px-5 py-4 flex items-center gap-4 transition-all hover:border-purple-800/40" id="wanted-post-{{ p.id }}">
+
+      <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.15);">
+        <svg class="w-5 h-5" style="color:#fbbf24;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803 7.5 7.5 0 0016.803 15.803z"/>
+        </svg>
+      </div>
+
+      <div class="flex-1 min-w-0">
+        <p class="font-medium text-sm truncate" style="color:#e8e8f0;">{{ p.book_title }}</p>
+        <p class="text-xs mt-0.5 flex items-center gap-1.5" style="color:#44445a;">
+          Posted by
+          <a href="/profile/{{ p.user.id }}" class="transition-colors hover:text-purple-400" style="color:#8888a8;">{{ p.user.name }}</a>
+          {% if p.course_code %}
+          <span class="px-1.5 py-0.5 rounded text-xs" style="background:#1c1c27;color:#5a5a80;">{{ p.course_code }}</span>
+          {% endif %}
+          {% if p.max_price %}
+          <span style="color:#fbbf24;">Max ₹{{ p.max_price }}</span>
+          {% endif %}
+        </p>
+      </div>
+
+      {% if request.state.user and request.state.user.id == p.user_id %}
+      <form method="post" action="/wanted/{{ p.id }}/delete" class="shrink-0">
+        <button type="submit" class="text-xs font-medium transition-colors hover:opacity-80" style="color:#3a3a55;" id="wanted-remove-{{ p.id }}">× Remove</button>
+      </form>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+
+  {% else %}
+  <!-- Empty state -->
+  <div class="flex flex-col items-center justify-center py-24 text-center animate-fade-in">
+    <div class="w-18 h-18 rounded-2xl flex items-center justify-center mb-5" style="width:4.5rem;height:4.5rem;background:#1c1c27;border:1px solid #2a2a38;">
+      <svg class="w-8 h-8" style="color:#2a2a50;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803 7.5 7.5 0 0016.803 15.803z"/>
+      </svg>
+    </div>
+    <h2 class="text-base font-semibold mb-2" style="color:#8888a8;">No wanted posts yet</h2>
+    <p class="text-sm" style="color:#44445a;">Be the first to post a book you need.</p>
+  </div>
+  {% endif %}
+
+</div>
+{% endblock %}

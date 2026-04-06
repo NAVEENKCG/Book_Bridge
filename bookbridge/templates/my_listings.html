@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+{% block title %}My Listings — BookBridge{% endblock %}
+
+{% block content %}
+
+<!-- Page header -->
+<div class="flex items-center justify-between mb-7">
+  <div>
+    <h1 class="font-display font-bold text-2xl text-white">My Listings</h1>
+    <p class="text-sm mt-1" style="color:#5a5a80;">
+      {{ listings|length }} listing{{ 's' if listings|length != 1 }} listed
+    </p>
+  </div>
+  <a href="/list" id="my-listings-add" class="bb-btn-primary">
+    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/></svg>
+    List a Book
+  </a>
+</div>
+
+{% if listings %}
+<div class="bb-card overflow-hidden">
+  <table class="w-full text-sm">
+    <thead style="background:#1c1c27;border-bottom:1px solid #2a2a38;">
+      <tr>
+        <th class="text-left px-5 py-3.5 font-semibold" style="color:#5a5a80;">Book</th>
+        <th class="text-left px-5 py-3.5 font-semibold hidden sm:table-cell" style="color:#5a5a80;">Course</th>
+        <th class="text-left px-5 py-3.5 font-semibold" style="color:#5a5a80;">Price</th>
+        <th class="text-left px-5 py-3.5 font-semibold" style="color:#5a5a80;">Status</th>
+        <th class="px-5 py-3.5"></th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for l in listings %}
+      <tr class="transition-colors border-t" style="border-color:#1e1e2e;" onmouseover="this.style.background='#1c1c27'" onmouseout="this.style.background='transparent'" id="my-listing-row-{{ l.id }}">
+        <!-- Book cell -->
+        <td class="px-5 py-4">
+          <div class="flex items-center gap-3">
+            {% if l.cover_url %}
+            <img src="{{ l.cover_url }}" alt="{{ l.title }}" class="w-9 h-12 object-contain rounded-md shrink-0" style="background:#1c1c27;" />
+            {% else %}
+            <div class="w-9 h-12 rounded-md flex items-center justify-center shrink-0" style="background:#1c1c27;border:1px solid #2a2a38;">
+              <svg class="w-4 h-4" style="color:#2a2a50;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292M12 6.042A8.966 8.966 0 0118 3.75c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292M12 6.042v16.25"/></svg>
+            </div>
+            {% endif %}
+            <div class="min-w-0">
+              <a href="/listing/{{ l.id }}" class="font-medium text-sm transition-colors hover:text-purple-400 truncate block" style="color:#e8e8f0;" id="my-listing-link-{{ l.id }}">{{ l.title }}</a>
+              <p class="text-xs truncate mt-0.5" style="color:#44445a;">{{ l.author or '' }}</p>
+            </div>
+          </div>
+        </td>
+
+        <!-- Course -->
+        <td class="px-5 py-4 hidden sm:table-cell" style="color:#5a5a80;">{{ l.course_code or '—' }}</td>
+
+        <!-- Price -->
+        <td class="px-5 py-4 font-semibold" style="color:#e8e8f0;">
+          {% if l.price %}₹{{ l.price }}{% else %}<span style="color:#44445a;">—</span>{% endif %}
+        </td>
+
+        <!-- Status -->
+        <td class="px-5 py-4">
+          <span class="bb-badge status-{{ l.status }}">{{ l.status | capitalize }}</span>
+        </td>
+
+        <!-- Actions -->
+        <td class="px-5 py-4 text-right">
+          {% if l.status not in ('completed', 'unavailable') %}
+          <form method="post" action="/listing/{{ l.id }}/delete" onsubmit="return confirm('Remove this listing?')" class="inline">
+            <button type="submit" class="text-xs font-medium transition-colors" style="color:#f87171;" id="my-listing-remove-{{ l.id }}">Remove</button>
+          </form>
+          {% endif %}
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% else %}
+<!-- Empty state -->
+<div class="flex flex-col items-center justify-center py-24 text-center animate-fade-in">
+  <div class="w-20 h-20 rounded-2xl flex items-center justify-center mb-5" style="background:#1c1c27;border:1px solid #2a2a38;">
+    <svg class="w-9 h-9" style="color:#2a2a50;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15"/>
+    </svg>
+  </div>
+  <h2 class="text-lg font-semibold mb-2" style="color:#8888a8;">No listings yet</h2>
+  <p class="text-sm mb-7" style="color:#44445a;">List a book and earn <strong style="color:#fbbf24;">+10 BookCoins</strong>.</p>
+  <a href="/list" id="my-listings-empty-cta" class="bb-btn-primary">List Your First Book</a>
+</div>
+{% endif %}
+
+{% endblock %}

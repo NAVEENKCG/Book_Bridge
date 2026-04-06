@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% block title %}BookBridge — Campus Book Exchange{% endblock %}
+
+{% block content %}
+
+<!-- ── Hero ─────────────────────────────────────────────────────────────── -->
+<div class="relative rounded-2xl overflow-hidden mb-10" style="background:linear-gradient(135deg,#1a1030 0%,#12102a 50%,#0d1420 100%);border:1px solid rgba(108,71,255,0.25);padding:3rem 2rem;">
+  <!-- Ambient glow blobs -->
+  <div class="absolute top-0 left-1/4 w-64 h-64 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(108,71,255,0.2),transparent 70%);filter:blur(40px);top:-40px;"></div>
+  <div class="absolute bottom-0 right-1/4 w-48 h-48 rounded-full pointer-events-none" style="background:radial-gradient(circle,rgba(29,233,182,0.1),transparent 70%);filter:blur(30px);bottom:-20px;"></div>
+
+  <div class="relative z-10">
+    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium mb-5" style="background:rgba(108,71,255,0.15);border:1px solid rgba(108,71,255,0.25);color:#c4b5fd;">
+      <span class="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse-slow"></span>
+      Live Campus Marketplace
+    </div>
+
+    <h1 class="font-display font-bold text-3xl sm:text-4xl text-white mb-2 leading-tight">
+      Find Textbooks.<br>
+      <span class="gradient-text">Save Money.</span>
+    </h1>
+    <p class="text-sm sm:text-base mb-8" style="color:rgba(200,200,224,0.7);max-width:36rem;">
+      Buy, sell and swap second-hand books with verified students at your college. Fast, safe, and built for campus life.
+    </p>
+
+    <!-- Search -->
+    <form method="get" action="/" class="flex flex-col sm:flex-row gap-2.5" id="hero-search-form">
+      <div class="relative flex-1">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color:#4a4a65;" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803 7.5 7.5 0 0016.803 15.803z"/></svg>
+        <input type="text" name="q" value="{{ q }}" placeholder="Search title or author..."
+          class="bb-input pl-9" style="background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.1);" id="search-query" />
+      </div>
+      <input type="text" name="course" value="{{ course }}" placeholder="Course code (e.g. CS301)"
+        class="bb-input sm:w-44" style="background:rgba(255,255,255,0.06);border-color:rgba(255,255,255,0.1);" id="search-course" />
+      <button type="submit" class="bb-btn-primary px-6" id="search-submit">
+        Search
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ── Filters row ────────────────────────────────────────────────────────── -->
+<form method="get" action="/" class="flex flex-wrap items-center gap-3 mb-7" id="filter-form">
+  <input type="hidden" name="q" value="{{ q }}" />
+  <input type="hidden" name="course" value="{{ course }}" />
+
+  <select name="condition" onchange="this.form.submit()" class="bb-input" style="width:auto;padding:0.5rem 0.875rem;" id="filter-condition">
+    <option value="">All conditions</option>
+    {% for c in conditions %}
+    <option value="{{ c }}" {% if condition == c %}selected{% endif %}>{{ c }}</option>
+    {% endfor %}
+  </select>
+
+  <div class="relative">
+    <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs" style="color:#4a4a65;">₹</span>
+    <input type="number" name="max_price" value="{{ max_price }}" placeholder="Max price"
+      class="bb-input pl-6" style="width:8rem;" id="filter-max-price" />
+  </div>
+
+  <label class="flex items-center gap-2 text-sm cursor-pointer select-none" style="color:#8888a8;">
+    <input type="checkbox" name="exchange_only" value="1" {% if exchange_only %}checked{% endif %}
+      onchange="this.form.submit()" class="w-4 h-4 rounded" style="accent-color:#6c47ff;" id="filter-exchange-only" />
+    Exchange only
+  </label>
+
+  <button type="submit" class="bb-btn-ghost text-sm px-4 py-2" id="filter-apply">Apply</button>
+
+  {% if q or course or condition or max_price or exchange_only %}
+  <a href="/" class="text-sm transition-colors" style="color:#44445a;" id="filter-clear">Clear all ×</a>
+  {% endif %}
+</form>
+
+<!-- ── Count line ─────────────────────────────────────────────────────────── -->
+{% if listings %}
+<p class="text-sm mb-5" style="color:#44445a;">
+  Showing <strong style="color:#8888a8;">{{ listings|length }}</strong> listing{{ 's' if listings|length != 1 }}
+  {% if q or course %} for <strong style="color:#a5b4fc;">"{{ q or course }}"</strong>{% endif %}
+</p>
+{% endif %}
+
+<!-- ── Listings grid ──────────────────────────────────────────────────────── -->
+{% if listings %}
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+  {% for l in listings %}
+  <a href="/listing/{{ l.id }}" class="book-card group flex flex-col" id="listing-{{ l.id }}">
+
+    <!-- Cover -->
+    <div class="relative overflow-hidden flex items-center justify-center w-full" style="height:10rem;background:#1c1c27;">
+      {% if l.cover_url %}
+      <img src="{{ l.cover_url }}" alt="{{ l.title }}"
+        class="h-full w-full object-contain transition-transform duration-300 group-hover:scale-105" />
+      {% else %}
+      <div class="flex flex-col items-center gap-1.5" style="color:#2a2a50;">
+        <svg class="w-10 h-10" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292M12 6.042A8.966 8.966 0 0118 3.75c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292M12 6.042v16.25"/>
+        </svg>
+        <span class="text-xs" style="color:#3a3a55;">No cover</span>
+      </div>
+      {% endif %}
+      <!-- Condition badge overlay -->
+      <div class="absolute top-2 left-2">
+        {% set cc = {"New":"cond-new","Like New":"cond-likenew","Good":"cond-good","Fair":"cond-fair","Poor":"cond-poor"} %}
+        <span class="bb-badge {{ cc.get(l.condition, 'cond-good') }}">{{ l.condition }}</span>
+      </div>
+    </div>
+
+    <!-- Details -->
+    <div class="p-3 flex flex-col gap-1 flex-1">
+      <h3 class="font-semibold text-sm leading-snug truncate transition-colors group-hover:text-purple-300" style="color:#e8e8f0;">{{ l.title }}</h3>
+      <p class="text-xs truncate" style="color:#44445a;">{{ l.author or "Unknown author" }}</p>
+
+      <div class="flex items-center justify-between mt-auto pt-2 border-t" style="border-color:#1e1e2e;">
+        {% if l.price %}
+        <span class="font-bold text-sm" style="color:#e8e8f0;">₹{{ l.price }}</span>
+        {% elif l.is_exchange %}
+        <span class="text-xs font-semibold" style="color:#a5b4fc;">Exchange</span>
+        {% else %}
+        <span class="text-xs" style="color:#44445a;">Negotiate</span>
+        {% endif %}
+
+        {% if l.course_code %}
+        <span class="text-xs px-1.5 py-0.5 rounded" style="background:#1c1c27;color:#5a5a80;">{{ l.course_code }}</span>
+        {% endif %}
+      </div>
+    </div>
+  </a>
+  {% endfor %}
+</div>
+
+{% else %}
+<!-- Empty state -->
+<div class="flex flex-col items-center justify-center py-28 text-center animate-fade-in">
+  <div class="w-20 h-20 rounded-2xl flex items-center justify-center mb-5" style="background:#1c1c27;border:1px solid #2a2a38;">
+    <svg class="w-9 h-9" style="color:#2a2a50;" fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803 7.5 7.5 0 0016.803 15.803z"/>
+    </svg>
+  </div>
+  <h2 class="text-lg font-semibold mb-2" style="color:#8888a8;">No listings found</h2>
+  <p class="text-sm mb-7" style="color:#44445a;">Try adjusting your search or filters, or be the first to list a book!</p>
+  {% if request.state.user %}
+  <a href="/list" class="bb-btn-primary" id="empty-list-cta">+ List a Book</a>
+  {% else %}
+  <a href="/register" class="bb-btn-primary" id="empty-register-cta">Get Started — It's Free</a>
+  {% endif %}
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  /* Strip empty query params so ?max_price= never reaches the server */
+  document.getElementById('filter-form').addEventListener('submit', function () {
+    this.querySelectorAll('input, select').forEach(function (el) {
+      if (el.value === '' || el.value === null) el.disabled = true;
+    });
+  });
+</script>
+{% endblock %}
